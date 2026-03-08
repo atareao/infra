@@ -1,0 +1,44 @@
+[Unit]
+Description=Umami-DB
+After=traefik.service
+Requires=traefik.service
+
+[Container]
+Image=docker.io/postgres:18-alpine
+ContainerName=umami
+PodmanArgs=--init
+AutoUpdate=registry
+
+# Networks
+Network=umami.network
+Network=proxy.network
+
+# Volumes
+Volume=umami-db-data.volume:/var/lib/postgresql/data
+
+# Secrets
+
+# Environment Variables
+DATABASE_URL=postgresql://{{ env.UMAMI_DB_USERNAME }}:{{ env.UMAMI_DB_PASSWORD }}@umami-db:5432/umami
+DATABASE_TYPE=postgresql
+APP_SECRET=
+
+# Labels
+Label=traefik.enable=true
+Label=traefik.http.services.umami.loadbalancer.server.port=3000
+Label=traefik.http.routers.umami.entrypoints=websecure
+Label=traefik.http.routers.umami.rule=Host(`umami.{{ env.DOMAIN }}`)
+
+# HealthCheck
+HealthCmd=sh -c 'pg_isready -U {{env.UMAMI_DB_USERNAME }} -d umami'
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=10
+
+[Service]
+Environment=SOPS_AGE_KEY_FILE=%h/.secrets/sops/age/key.txt
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin
+
+[Install]
+WantedBy=multi-user.target
+

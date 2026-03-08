@@ -1,0 +1,33 @@
+[Unit]
+Description=Umami
+After=traefik.service umami-db.service
+Requires=traefik.service umami-db.service
+
+[Container]
+Image=ghcr.io/umami-software/umami:postgresql-latest
+ContainerName=umami
+AutoUpdate=registry
+
+# Networks
+Network=umami.network
+Network=proxy.network
+
+# Volumes
+
+# Secrets
+
+# Environment Variables
+DATABASE_URL=postgresql://{{ env.UMAMI_DB_USERNAME }}:{{ env.UMAMI_DB_PASSWORD }}@umami-db:5432/umami
+DATABASE_TYPE=postgresql
+APP_SECRET=
+
+# Labels
+Label=traefik.enable=true
+Label=traefik.http.services.umami.loadbalancer.server.port=3000
+Label=traefik.http.routers.umami.entrypoints=websecure
+Label=traefik.http.routers.umami.rule=Host(`umami.{{ env.DOMAIN }}`)
+
+[Service]
+
+[Install]
+WantedBy=multi-user.target

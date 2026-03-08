@@ -6,6 +6,7 @@ Requires=traefik.service
 [Container]
 Image=docker.io/superseriousbusiness/gotosocial:latest
 ContainerName=gotosocial
+PodmanArgs=--init
 AutoUpdate=registry
 
 # Secrets
