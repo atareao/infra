@@ -1,0 +1,34 @@
+[Unit]
+Description=Dockpeek
+After=traefik.service
+Requires=traefik.service
+
+[Container]
+Image=ghcr.io/dockpeek/dockpeek:latest
+ContainerName=dockpeek
+AutoUpdate=registry
+
+# Secrets
+Secret=dockpeek_secret_key
+Secret=dockpeek_username
+Secret=dockpeek_password
+
+# Networks
+Network=proxy.network
+
+# Volumes
+Volume=%t/podman/podman.sock:/var/run/docker.sock:ro
+
+# Labels
+Label=traefik.enable=true
+Label=traefik.http.services.dockpeek.loadbalancer.server.port=8000
+Label=traefik.http.routers.dockpeek.entrypoints=websecure
+Label=traefik.http.routers.dockpeek.rule=Host(`{{ env.DOMAIN }}`)
+
+[Service]
+Environment=SOPS_AGE_KEY_FILE=%h/.secrets/sops/age/key.txt
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin
+Restart=unless-stopped
+
+[Install]
+WantedBy=multi-user.target
