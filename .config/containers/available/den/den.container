@@ -1,0 +1,27 @@
+[Unit]
+Description=Den
+After=network-online.target
+
+[Container]
+Image=docker.io/atareao/den:latest
+ContainerName=den
+AutoUpdate=registry
+
+# Persistencia
+Volume=%t/podman/podman.sock:/var/run/docker.sock:ro
+Volume=%h/.config/den/config.yml:/app/config.yml:ro,Z
+
+# Networking
+
+# Environment
+Environment=RUST_LOG=info
+
+# Healthcheck
+
+[Service]
+# Environemnt
+# Restart
+Restart=unless-stopped
+
+[Install]
+WantedBy=default.target
